@@ -17,7 +17,16 @@ const format = d3.format(",d");
 
 
 // color scale
-const colorSpec = d3.interpolateSpectral();
+const color = d3.scaleOrdinal([
+  "#9e0142", // 1
+    "#3288bd", // 8
+    "#e6f598", // 5
+  "#d53e4f", // 2
+    "#abdda4", // 6
+  "#f46d43", // 3
+    "#66c2a5", // 7
+  "#fdae61", // 4
+  "#5e4fa2"]); // 9
 
 // add html for tooltip
 d3.select("body")
@@ -75,9 +84,8 @@ const render = (error, games) => {
       range: d3.range(min, max, (max - min) / category.children.length)
     }
   })
+  console.log(catMinMax);
 
-  // generate alpha value for each tile
-  // (darker tiles are largest in each category, lighter tiles are smaller)
   const alphaScale = (catName) => {
     const min = catMinMax.find(catObj => catObj.name === catName).min
     const max = catMinMax.find(catObj => catObj.name === catName).max
@@ -106,8 +114,7 @@ const render = (error, games) => {
       console.log(`val/area: ${d.data.value/((d.x1 - d.x0)*(d.y1 - d.y0))}`);
     })
     .attr("fill", (d) => {
-      // const rgb = hexToRgb(color11(d.data.category));
-      const rgb = hexToRgb(color11(d.data.category));
+      const rgb = hexToRgb(color(d.data.category));
       rgb.a = alphaScale(d.data.category)(d.data.value);
       const { r, g, b, a } = rgb;
       return `rgba(${r},${g},${b},${a})`;
