@@ -3,18 +3,21 @@ const svg = d3.select("svg");
 const width = +svg.attr("width");
 const height = +svg.attr("height");
 
-const color = d3.scaleOrdinal(["#d53e4f","#fc8d59","#fee08b","#ffffbf","#e6f598","#99d594","#3288bd"]);
-const colorRgb = d3.scaleOrdinal([
-  { r: 213, g: 62, b: 79, a: 1 },
-  { r: 252, g: 141, b: 89, a: 1 },
-  { r: 254, g: 224, b: 139, a: 1 },
-  { r: 255, g: 255, b: 191, a: 1 },
-  { r: 230, g: 245, b: 152, a: 1 },
-  { r: 153, g: 213, b: 148, a: 1 },
-  { r: 50,  g: 136, b: 189, a: 1 }
-  ]);
+// util methods
+const hexToRgb = (hex) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+  } : null;
+}
 
 const format = d3.format(",d");
+
+
+// color scale
+const colorSpec = d3.interpolateSpectral();
 
 // add html for tooltip
 d3.select("body")
@@ -22,10 +25,10 @@ d3.select("body")
   .attr("id", "tooltip");
 
 // render map
-const render = (error, movies) => {
+const render = (error, games) => {
   if (error) throw error;
 
-  console.log(movies);
+  console.log(games);
 
   // initialize treemap
   const treemap = d3.treemap()
@@ -50,8 +53,8 @@ const render = (error, movies) => {
       .style("visibility", "hidden")
   }
 
-  // add movie data
-  const root = d3.hierarchy(movies)
+  // add game data
+  const root = d3.hierarchy(games)
     .eachBefore((d) => {
       // console.log(d);
       d.data.id = (d.parent ? `${d.parent.data.id}.` : "") + d.data.name;
@@ -61,7 +64,7 @@ const render = (error, movies) => {
     .sort((a, b) => b.height - a.height || b.value - a.value);
 
   // find min and max values in each category
-  const catMinMax = movies.children.map((category) => {
+  const catMinMax = games.children.map((category) => {
     console.log(category);
     const min = d3.min(category.children, d => d.value);
     const max = d3.max(category.children, d => d.value);
@@ -72,13 +75,14 @@ const render = (error, movies) => {
       range: d3.range(min, max, (max - min) / category.children.length)
     }
   })
-  console.log(catMinMax);
 
+  // generate alpha value for each tile
+  // (darker tiles are largest in each category, lighter tiles are smaller)
   const alphaScale = (catName) => {
     const min = catMinMax.find(catObj => catObj.name === catName).min
     const max = catMinMax.find(catObj => catObj.name === catName).max
     return d3.scaleLinear()
-      .range([.7,1])
+      .range([1,.8])
       .domain([min, max]);
   }
 
@@ -95,13 +99,15 @@ const render = (error, movies) => {
     .attr("width", (d) => d.x1 - d.x0)
     .attr("height", (d) => d.y1 - d.y0)
     .attr("data-area", (d) => {
-      console.log(`width: ${d.x1 - d.x0}`);
-      console.log(`height: ${d.y1 - d.y0}`);
-      console.log(`area: ${(d.x1 - d.x0)*(d.y1 - d.y0)}`);
-      console.log(`value: ${d.data.value}`);
+      // console.log(`width: ${d.x1 - d.x0}`);
+      // console.log(`height: ${d.y1 - d.y0}`);
+      // console.log(`area: ${(d.x1 - d.x0)*(d.y1 - d.y0)}`);
+      // console.log(`value: ${d.data.value}`);
+      console.log(`val/area: ${d.data.value/((d.x1 - d.x0)*(d.y1 - d.y0))}`);
     })
     .attr("fill", (d) => {
-      const rgb = colorRgb(d.data.category);
+      // const rgb = hexToRgb(color11(d.data.category));
+      const rgb = hexToRgb(color11(d.data.category));
       rgb.a = alphaScale(d.data.category)(d.data.value);
       const { r, g, b, a } = rgb;
       return `rgba(${r},${g},${b},${a})`;
@@ -174,5 +180,5 @@ const render = (error, movies) => {
 
 // load data
 d3.queue()
-    .defer(d3.json, "https://cdn.rawgit.com/freeCodeCamp/testable-projects-fcc/a80ce8f9/src/data/tree_map/movie-data.json")
+    .defer(d3.json, "https://cdn.rawgit.com/freeCodeCamp/testable-projects-fcc/a80ce8f9/src/data/tree_map/video-game-sales-data.json")
     .await(render);
