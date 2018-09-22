@@ -13,7 +13,6 @@ body {
 }
 
 .tile {
-  fill: none;
   stroke: #fff;
   stroke-linejoin: round;
 }

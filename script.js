@@ -37,7 +37,7 @@ const render = (error, movies) => {
       .style("top", `${d3.event.pageY}px`)
       .style("left", `${d3.event.pageX + 20}px`)
       .attr("data-value", () => d.data.value)
-      .html(() => `<span class="tip-name">${d.data.name}</span><br><span class="tip-mass">${d.data.value}</span>`);
+      .html(() => `<span class="tip-name">${d.data.name}</span><br><span class="tip-mass">${format(d.data.value)}</span>`);
   }
 
   // hide tooltip
@@ -46,8 +46,6 @@ const render = (error, movies) => {
       .style("visibility", "hidden")
   }
 
-  const sumBySize = (d) => d.value;
-
   // add county data
   const root = d3.hierarchy(movies)
     .eachBefore((d) => {
@@ -55,7 +53,7 @@ const render = (error, movies) => {
       d.data.id = (d.parent ? `${d.parent.data.id}.` : "") + d.data.name;
       // console.log(d.data.id);
        })
-    .sum(sumBySize)
+    .sum((d) => d.value)
     .sort((a, b) => b.height - a.height || b.value - a.value);
 
   treemap(root);
@@ -68,6 +66,8 @@ const render = (error, movies) => {
   cell.append("rect")
     .attr("id", (d) => d.data.id)
     .attr("class", "tile")
+    // .attr('x', function(d) { return d.x0; })
+    // .attr('y', function(d) { return d.y0; })
     .attr("width", (d) => d.x1 - d.x0)
     .attr("height", (d) => d.y1 - d.y0)
     .attr("data-area", (d) => {
@@ -77,9 +77,9 @@ const render = (error, movies) => {
       console.log(`value: ${d.data.value}`);
     })
     .attr("fill", (d) => {
-      console.log(`d.parent.data.id: ${d.parent.data.id}`);
-      console.log(`color: ${color(d.parent.data.id)}`);
-      color(d.parent.data.id)
+      console.log(`d.data.category: ${d.data.category}`);
+      console.log(`color: ${color(d.data.category)}`);
+      return color(d.data.category);
     })
     .attr("data-name", (d) => d.data.name)
     .attr("data-category", (d) => d.data.category)
@@ -101,9 +101,6 @@ const render = (error, movies) => {
       .attr("x", 4)
       .attr("y", (d, i) => 13 + i * 10)
       .text((d) => d);
-
-  cell.append("title")
-      .text((d) => `${d.data.id}\n${format(d.value)}`)
 
 
 }
