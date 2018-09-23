@@ -8,13 +8,25 @@ body {
 	font-family: 'Titillium Web', sans-serif;
 }
 
-.map {
+.container {
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: middle;
+}
+
+.map, #legend {
   margin: auto;
 }
 
 .tile {
   stroke: #fff;
   stroke-linejoin: round;
+}
+
+.cell-label {
+  font-size: .7em;
 }
 
 .header, .subhead {
