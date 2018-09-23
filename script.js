@@ -43,7 +43,6 @@ const render = (error, games) => {
   const treemap = d3.treemap()
     .tile(d3.treemapResquarify)
     .size([width, height])
-    .round(true)
     .paddingInner(1);
 
   // show tooltip
@@ -53,7 +52,7 @@ const render = (error, games) => {
       .style("top", `${d3.event.pageY}px`)
       .style("left", `${d3.event.pageX + 20}px`)
       .attr("data-value", () => d.data.value)
-      .html(() => `<span class="tip-name">${d.data.name}</span><br><span class="tip-mass">$${format(d.data.value)}</span>`);
+      .html(() => `<span class="tip-name">${d.data.name}</span><br><span class="tip-mass">$${d.data.value}</span>`);
   }
 
   // hide tooltip
@@ -90,7 +89,7 @@ const render = (error, games) => {
     const min = catMinMax.find(catObj => catObj.name === catName).min
     const max = catMinMax.find(catObj => catObj.name === catName).max
     return d3.scaleLinear()
-      .range([1,.8])
+      .range([.8,.6])
       .domain([min, max]);
   }
 
